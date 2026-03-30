@@ -67,7 +67,6 @@ import org.schabi.newpipe.util.FilenameUtils;
 import org.schabi.newpipe.util.ListHelper;
 import org.schabi.newpipe.util.PermissionHelper;
 import org.schabi.newpipe.util.SecondaryStreamHelper;
-import android.widget.SeekBar;
 import org.schabi.newpipe.util.StreamItemAdapter;
 import org.schabi.newpipe.util.StreamItemAdapter.StreamInfoWrapper;
 import org.schabi.newpipe.util.ThemeHelper;
@@ -343,15 +342,28 @@ public class DownloadDialog extends DialogFragment
         final int threads = prefs.getInt(getString(R.string.default_download_threads), 3);
         dialogBinding.threadsCount.setText(String.valueOf(threads));
         dialogBinding.threads.setProgress(threads - 1);
-        dialogBinding.threads.setOnSeekBarChangeListener(new SimpleOnSeekBarChangeListener() {
+        dialogBinding.threads.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
-            public void onProgressChanged(@NonNull final SeekBar seekbar,
+            public void onProgressChanged(final SeekBar seekBar,
                                           final int progress,
                                           final boolean fromUser) {
+                if (!fromUser) {
+                    return;
+                }
                 final int newProgress = progress + 1;
                 prefs.edit().putInt(getString(R.string.default_download_threads), newProgress)
                         .apply();
                 dialogBinding.threadsCount.setText(String.valueOf(newProgress));
+            }
+
+            @Override
+            public void onStartTrackingTouch(final SeekBar seekBar) {
+                // Not needed
+            }
+
+            @Override
+            public void onStopTrackingTouch(final SeekBar seekBar) {
+                // Not needed
             }
         });
 
@@ -1136,8 +1148,12 @@ public class DownloadDialog extends DialogFragment
         if (isPartialDownload && !startTime.isEmpty() && !endTime.isEmpty()) {
             // TODO: Implement proper partial download support
             // For now, show a message that partial downloads are not fully supported
-            Toast.makeText(context, "Partial download feature is currently limited. " +
-                    "Full video will be downloaded.", Toast.LENGTH_LONG).show();
+            Toast.makeText(
+                    context,
+                    "Partial download feature is currently limited. "
+                            + "Full video will be downloaded.",
+                    Toast.LENGTH_LONG
+            ).show();
             // Continue with full download
         }
 
@@ -1172,7 +1188,7 @@ public class DownloadDialog extends DialogFragment
 
     private void setupTimeSliders() {
         // Set initial values
-        int startSeconds = timeStringToSeconds(startTime);
+        final int startSeconds = timeStringToSeconds(startTime);
         int endSeconds = timeStringToSeconds(endTime);
 
         if (startSeconds == 0 && endSeconds == 0) {
@@ -1187,13 +1203,17 @@ public class DownloadDialog extends DialogFragment
         updateTimeDisplays();
 
         // Set up listeners
-        dialogBinding.startTimeSlider.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+        dialogBinding.startTimeSlider.setOnSeekBarChangeListener(
+                new SeekBar.OnSeekBarChangeListener() {
             @Override
-            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+            public void onProgressChanged(final SeekBar seekBar,
+                                          final int progress,
+                                          final boolean fromUser) {
                 if (fromUser) {
                     // Ensure start time doesn't exceed end time
                     if (progress >= dialogBinding.endTimeSlider.getProgress()) {
-                        dialogBinding.startTimeSlider.setProgress(dialogBinding.endTimeSlider.getProgress() - 1);
+                        dialogBinding.startTimeSlider.setProgress(
+                                dialogBinding.endTimeSlider.getProgress() - 1);
                         return;
                     }
                     updateTimeDisplays();
@@ -1201,23 +1221,27 @@ public class DownloadDialog extends DialogFragment
             }
 
             @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {
+            public void onStartTrackingTouch(final SeekBar seekBar) {
                 // Not needed
             }
 
             @Override
-            public void onStopTrackingTouch(SeekBar seekBar) {
+            public void onStopTrackingTouch(final SeekBar seekBar) {
                 // Not needed
             }
         });
 
-        dialogBinding.endTimeSlider.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+        dialogBinding.endTimeSlider.setOnSeekBarChangeListener(
+                new SeekBar.OnSeekBarChangeListener() {
             @Override
-            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+            public void onProgressChanged(final SeekBar seekBar,
+                                          final int progress,
+                                          final boolean fromUser) {
                 if (fromUser) {
                     // Ensure end time doesn't go below start time
                     if (progress <= dialogBinding.startTimeSlider.getProgress()) {
-                        dialogBinding.endTimeSlider.setProgress(dialogBinding.startTimeSlider.getProgress() + 1);
+                        dialogBinding.endTimeSlider.setProgress(
+                                dialogBinding.startTimeSlider.getProgress() + 1);
                         return;
                     }
                     updateTimeDisplays();
@@ -1225,45 +1249,45 @@ public class DownloadDialog extends DialogFragment
             }
 
             @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {
+            public void onStartTrackingTouch(final SeekBar seekBar) {
                 // Not needed
             }
 
             @Override
-            public void onStopTrackingTouch(SeekBar seekBar) {
+            public void onStopTrackingTouch(final SeekBar seekBar) {
                 // Not needed
             }
         });
     }
 
     private void updateTimeDisplays() {
-        int startSeconds = dialogBinding.startTimeSlider.getProgress();
-        int endSeconds = dialogBinding.endTimeSlider.getProgress();
+        final int startSeconds = dialogBinding.startTimeSlider.getProgress();
+        final int endSeconds = dialogBinding.endTimeSlider.getProgress();
 
         dialogBinding.startTimeDisplay.setText(secondsToTimeString(startSeconds));
         dialogBinding.endTimeDisplay.setText(secondsToTimeString(endSeconds));
     }
 
-    private String secondsToTimeString(int totalSeconds) {
-        int hours = totalSeconds / 3600;
-        int minutes = (totalSeconds % 3600) / 60;
-        int seconds = totalSeconds % 60;
+    private String secondsToTimeString(final int totalSeconds) {
+        final int hours = totalSeconds / 3600;
+        final int minutes = (totalSeconds % 3600) / 60;
+        final int seconds = totalSeconds % 60;
         return String.format(Locale.getDefault(), "%02d:%02d:%02d", hours, minutes, seconds);
     }
 
-    private int timeStringToSeconds(String timeString) {
+    private int timeStringToSeconds(final String timeString) {
         if (timeString == null || timeString.trim().isEmpty()) {
             return 0;
         }
 
-        String[] parts = timeString.split(":");
+        final String[] parts = timeString.split(":");
         if (parts.length == 3) {
             try {
-                int hours = Integer.parseInt(parts[0]);
-                int minutes = Integer.parseInt(parts[1]);
-                int seconds = Integer.parseInt(parts[2]);
+                final int hours = Integer.parseInt(parts[0]);
+                final int minutes = Integer.parseInt(parts[1]);
+                final int seconds = Integer.parseInt(parts[2]);
                 return hours * 3600 + minutes * 60 + seconds;
-            } catch (NumberFormatException e) {
+            } catch (final NumberFormatException e) {
                 return 0;
             }
         }
