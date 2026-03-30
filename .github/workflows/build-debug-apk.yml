@@ -15,9 +15,9 @@ jobs:
 
       - uses: actions/setup-java@v5
         with:
-          distribution: temurin
+          distribution: 'temurin'
           java-version: '21'
-          cache: gradle
+          cache: 'gradle'
       - name: Verify Java version
         run: java -version && echo "JAVA_HOME: $JAVA_HOME"
       - name: Build debug APK
