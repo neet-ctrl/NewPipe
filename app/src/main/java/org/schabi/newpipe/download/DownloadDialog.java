@@ -67,7 +67,7 @@ import org.schabi.newpipe.util.FilenameUtils;
 import org.schabi.newpipe.util.ListHelper;
 import org.schabi.newpipe.util.PermissionHelper;
 import org.schabi.newpipe.util.SecondaryStreamHelper;
-import org.schabi.newpipe.util.SimpleOnSeekBarChangeListener;
+import android.widget.SeekBar;
 import org.schabi.newpipe.util.StreamItemAdapter;
 import org.schabi.newpipe.util.StreamItemAdapter.StreamInfoWrapper;
 import org.schabi.newpipe.util.ThemeHelper;
@@ -1187,9 +1187,9 @@ public class DownloadDialog extends DialogFragment
         updateTimeDisplays();
 
         // Set up listeners
-        dialogBinding.startTimeSlider.setOnSeekBarChangeListener(new SimpleOnSeekBarChangeListener() {
+        dialogBinding.startTimeSlider.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
-            public void onProgressChanged(@NonNull final SeekBar seekBar, final int progress, final boolean fromUser) {
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 if (fromUser) {
                     // Ensure start time doesn't exceed end time
                     if (progress >= dialogBinding.endTimeSlider.getProgress()) {
@@ -1199,11 +1199,21 @@ public class DownloadDialog extends DialogFragment
                     updateTimeDisplays();
                 }
             }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+                // Not needed
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+                // Not needed
+            }
         });
 
-        dialogBinding.endTimeSlider.setOnSeekBarChangeListener(new SimpleOnSeekBarChangeListener() {
+        dialogBinding.endTimeSlider.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
-            public void onProgressChanged(@NonNull final SeekBar seekBar, final int progress, final boolean fromUser) {
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 if (fromUser) {
                     // Ensure end time doesn't go below start time
                     if (progress <= dialogBinding.startTimeSlider.getProgress()) {
@@ -1212,6 +1222,16 @@ public class DownloadDialog extends DialogFragment
                     }
                     updateTimeDisplays();
                 }
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+                // Not needed
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+                // Not needed
             }
         });
     }

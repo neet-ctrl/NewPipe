@@ -55,7 +55,6 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:text="00:00:00"
-                android:background="@drawable/rounded_background"
                 android:padding="8dp"
                 android:textColor="?android:textColorPrimary" />
 
@@ -87,7 +86,6 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:text="00:00:00"
-                android:background="@drawable/rounded_background"
                 android:padding="8dp"
                 android:textColor="?android:textColorPrimary" />
 
