@@ -1,0 +1,50 @@
+name: "Build debug APK"
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - refactor
+      - dev
+
+jobs:
+  debug:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: gradle
+
+      - name: Build debug APK
+        run: ./gradlew assembleDebug --stacktrace
+
+      - name: Publish APK metadata
+        run: |
+          if [ -f "app/build/outputs/apk/debug/output-metadata.json" ]; then
+            VERSION_NAME="$(jq -r ".elements[0].versionName" "app/build/outputs/apk/debug/output-metadata.json")"
+            echo "Version name: $VERSION_NAME" >> "$GITHUB_STEP_SUMMARY"
+            echo '```json' >> "$GITHUB_STEP_SUMMARY"
+            cat "app/build/outputs/apk/debug/output-metadata.json" >> "$GITHUB_STEP_SUMMARY"
+            echo '```' >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "No output metadata found" >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Rename APK
+        run: |
+          mkdir -p app/build/outputs/apk/debug/artifacts
+          find app/build/outputs/apk/debug -maxdepth 1 -name "*.apk" -print -quit | while read -r apk; do
+            if [ -n "$apk" ]; then
+              mv "$apk" "app/build/outputs/apk/debug/NewPipe_Debug.apk"
+            fi
+          done
+
+      - name: Upload debug APK
+        uses: actions/upload-artifact@v6
+        with:
+          name: app-debug
+          path: app/build/outputs/apk/debug/NewPipe_Debug.apk
