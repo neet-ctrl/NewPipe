@@ -331,8 +331,9 @@ public class DownloadDialog extends DialogFragment
         dialogBinding.downloadTypeSwitch.setChecked(isPartialDownload);
         dialogBinding.partialDownloadLayout.setVisibility(
             isPartialDownload ? View.VISIBLE : View.GONE);
-        dialogBinding.startTimeEdit.setText(startTime);
-        dialogBinding.endTimeEdit.setText(endTime);
+
+        // Initialize time sliders
+        setupTimeSliders();
 
         initToolbar(dialogBinding.toolbarLayout.toolbar);
         setupDownloadOptions();
@@ -777,8 +778,13 @@ public class DownloadDialog extends DialogFragment
 
     private void prepareSelectedDownload() {
         // Save partial download settings
-        startTime = Objects.requireNonNull(dialogBinding.startTimeEdit.getText()).toString().trim();
-        endTime = Objects.requireNonNull(dialogBinding.endTimeEdit.getText()).toString().trim();
+        if (isPartialDownload) {
+            startTime = secondsToTimeString(dialogBinding.startTimeSlider.getProgress());
+            endTime = secondsToTimeString(dialogBinding.endTimeSlider.getProgress());
+        } else {
+            startTime = "";
+            endTime = "";
+        }
 
         final StoredDirectoryHelper mainStorage;
         final MediaFormat format;
@@ -1128,17 +1134,11 @@ public class DownloadDialog extends DialogFragment
 
         // Handle partial download post-processing
         if (isPartialDownload && !startTime.isEmpty() && !endTime.isEmpty()) {
-            // For partial downloads, we need to cut the video/audio after download
-            // This requires FFmpeg or similar tool
-            if (psName != null) {
-                // If there's already post-processing, we need to chain it
-                // For simplicity, we'll add video cutting as additional post-processing
-                psArgs = new String[]{startTime, endTime};
-                psName = "video_cut"; // We'll need to implement this algorithm
-            } else {
-                psName = "video_cut";
-                psArgs = new String[]{startTime, endTime};
-            }
+            // TODO: Implement proper partial download support
+            // For now, show a message that partial downloads are not fully supported
+            Toast.makeText(context, "Partial download feature is currently limited. " +
+                    "Full video will be downloaded.", Toast.LENGTH_LONG).show();
+            // Continue with full download
         }
 
         if (secondaryStream == null) {
@@ -1168,5 +1168,85 @@ public class DownloadDialog extends DialogFragment
                 Toast.LENGTH_SHORT).show();
 
         dismiss();
+    }
+
+    private void setupTimeSliders() {
+        // Set initial values
+        int startSeconds = timeStringToSeconds(startTime);
+        int endSeconds = timeStringToSeconds(endTime);
+
+        if (startSeconds == 0 && endSeconds == 0) {
+            // Default: start at 0, end at video duration (assuming 1 hour max for slider)
+            endSeconds = 3600; // 1 hour
+        }
+
+        dialogBinding.startTimeSlider.setProgress(startSeconds);
+        dialogBinding.endTimeSlider.setProgress(endSeconds);
+
+        // Update display texts
+        updateTimeDisplays();
+
+        // Set up listeners
+        dialogBinding.startTimeSlider.setOnSeekBarChangeListener(new SimpleOnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(@NonNull final SeekBar seekBar, final int progress, final boolean fromUser) {
+                if (fromUser) {
+                    // Ensure start time doesn't exceed end time
+                    if (progress >= dialogBinding.endTimeSlider.getProgress()) {
+                        dialogBinding.startTimeSlider.setProgress(dialogBinding.endTimeSlider.getProgress() - 1);
+                        return;
+                    }
+                    updateTimeDisplays();
+                }
+            }
+        });
+
+        dialogBinding.endTimeSlider.setOnSeekBarChangeListener(new SimpleOnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(@NonNull final SeekBar seekBar, final int progress, final boolean fromUser) {
+                if (fromUser) {
+                    // Ensure end time doesn't go below start time
+                    if (progress <= dialogBinding.startTimeSlider.getProgress()) {
+                        dialogBinding.endTimeSlider.setProgress(dialogBinding.startTimeSlider.getProgress() + 1);
+                        return;
+                    }
+                    updateTimeDisplays();
+                }
+            }
+        });
+    }
+
+    private void updateTimeDisplays() {
+        int startSeconds = dialogBinding.startTimeSlider.getProgress();
+        int endSeconds = dialogBinding.endTimeSlider.getProgress();
+
+        dialogBinding.startTimeDisplay.setText(secondsToTimeString(startSeconds));
+        dialogBinding.endTimeDisplay.setText(secondsToTimeString(endSeconds));
+    }
+
+    private String secondsToTimeString(int totalSeconds) {
+        int hours = totalSeconds / 3600;
+        int minutes = (totalSeconds % 3600) / 60;
+        int seconds = totalSeconds % 60;
+        return String.format(Locale.getDefault(), "%02d:%02d:%02d", hours, minutes, seconds);
+    }
+
+    private int timeStringToSeconds(String timeString) {
+        if (timeString == null || timeString.trim().isEmpty()) {
+            return 0;
+        }
+
+        String[] parts = timeString.split(":");
+        if (parts.length == 3) {
+            try {
+                int hours = Integer.parseInt(parts[0]);
+                int minutes = Integer.parseInt(parts[1]);
+                int seconds = Integer.parseInt(parts[2]);
+                return hours * 3600 + minutes * 60 + seconds;
+            } catch (NumberFormatException e) {
+                return 0;
+            }
+        }
+        return 0;
     }
 }

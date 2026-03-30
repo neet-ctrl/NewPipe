@@ -49,30 +49,57 @@
                 android:text="@string/start_time"
                 android:layout_marginRight="8dp" />
 
-            <org.schabi.newpipe.views.NewPipeEditText
-                android:id="@+id/start_time_edit"
+            <org.schabi.newpipe.views.NewPipeTextView
+                android:id="@+id/start_time_display"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:hint="00:00:00"
-                android:inputType="time" />
+                android:text="00:00:00"
+                android:background="@drawable/rounded_background"
+                android:padding="8dp"
+                android:textColor="?android:textColorPrimary" />
+
+        </LinearLayout>
+
+        <SeekBar
+            android:id="@+id/start_time_slider"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:max="3600"
+            android:progress="0" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="16dp">
 
             <org.schabi.newpipe.views.NewPipeTextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/end_time"
-                android:layout_marginLeft="16dp"
                 android:layout_marginRight="8dp" />
 
-            <org.schabi.newpipe.views.NewPipeEditText
-                android:id="@+id/end_time_edit"
+            <org.schabi.newpipe.views.NewPipeTextView
+                android:id="@+id/end_time_display"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:hint="00:00:00"
-                android:inputType="time" />
+                android:text="00:00:00"
+                android:background="@drawable/rounded_background"
+                android:padding="8dp"
+                android:textColor="?android:textColorPrimary" />
 
         </LinearLayout>
+
+        <SeekBar
+            android:id="@+id/end_time_slider"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:max="3600"
+            android:progress="3600" />
     </LinearLayout>
 
     <org.schabi.newpipe.views.NewPipeTextView
