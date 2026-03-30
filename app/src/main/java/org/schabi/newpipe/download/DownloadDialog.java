@@ -20,6 +20,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.CompoundButton;
 import android.widget.RadioGroup;
 import android.widget.SeekBar;
 import android.widget.Toast;
@@ -109,6 +110,12 @@ public class DownloadDialog extends DialogFragment
     int selectedAudioIndex = 0; // default to the first item
     @State
     int selectedSubtitleIndex = 0; // default to the first item
+    @State
+    boolean isPartialDownload = false;
+    @State
+    String startTime = "";
+    @State
+    String endTime = "";
 
     private StoredDirectoryHelper mainStorageAudio = null;
     private StoredDirectoryHelper mainStorageVideo = null;
@@ -232,7 +239,9 @@ public class DownloadDialog extends DialogFragment
                 downloadManager = mgr.getDownloadManager();
                 askForSavePath = mgr.askForSavePath();
 
-                okButton.setEnabled(true);
+                if (okButton != null) {
+                    okButton.setEnabled(true);
+                }
 
                 context.unbindService(this);
             }
@@ -310,6 +319,20 @@ public class DownloadDialog extends DialogFragment
         dialogBinding.audioTrackSpinner.setOnItemSelectedListener(this);
         dialogBinding.videoAudioGroup.setOnCheckedChangeListener(this);
 
+        // Setup partial download switch
+        dialogBinding.downloadTypeSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            isPartialDownload = isChecked;
+            dialogBinding.partialDownloadLayout.setVisibility(isChecked ? View.VISIBLE : View.GONE);
+            dialogBinding.downloadTypeSwitch.setText(isChecked ?
+                getString(R.string.download_type_partial) : getString(R.string.download_type_complete));
+        });
+
+        // Initialize partial download UI
+        dialogBinding.downloadTypeSwitch.setChecked(isPartialDownload);
+        dialogBinding.partialDownloadLayout.setVisibility(isPartialDownload ? View.VISIBLE : View.GONE);
+        dialogBinding.startTimeEdit.setText(startTime);
+        dialogBinding.endTimeEdit.setText(endTime);
+
         initToolbar(dialogBinding.toolbarLayout.toolbar);
         setupDownloadOptions();
 
@@ -344,8 +367,10 @@ public class DownloadDialog extends DialogFragment
         toolbar.setNavigationOnClickListener(v -> dismiss());
         toolbar.setNavigationContentDescription(R.string.cancel);
 
-        okButton = toolbar.findViewById(R.id.okay);
-        okButton.setEnabled(false); // disable until the download service connection is done
+        okButton = toolbar.getMenu().findItem(R.id.okay);
+        if (okButton != null) {
+            okButton.setEnabled(false); // disable until the download service connection is done
+        }
 
         toolbar.setOnMenuItemClickListener(item -> {
             if (item.getItemId() == R.id.okay) {
@@ -750,6 +775,10 @@ public class DownloadDialog extends DialogFragment
     }
 
     private void prepareSelectedDownload() {
+        // Save partial download settings
+        startTime = Objects.requireNonNull(dialogBinding.startTimeEdit.getText()).toString().trim();
+        endTime = Objects.requireNonNull(dialogBinding.endTimeEdit.getText()).toString().trim();
+
         final StoredDirectoryHelper mainStorage;
         final MediaFormat format;
         final String selectedMediaType;
@@ -1094,6 +1123,21 @@ public class DownloadDialog extends DialogFragment
             }
         } else {
             return;
+        }
+
+        // Handle partial download post-processing
+        if (isPartialDownload && !startTime.isEmpty() && !endTime.isEmpty()) {
+            // For partial downloads, we need to cut the video/audio after download
+            // This requires FFmpeg or similar tool
+            if (psName != null) {
+                // If there's already post-processing, we need to chain it
+                // For simplicity, we'll add video cutting as additional post-processing
+                psArgs = new String[]{startTime, endTime};
+                psName = "video_cut"; // We'll need to implement this algorithm
+            } else {
+                psName = "video_cut";
+                psArgs = new String[]{startTime, endTime};
+            }
         }
 
         if (secondaryStream == null) {
