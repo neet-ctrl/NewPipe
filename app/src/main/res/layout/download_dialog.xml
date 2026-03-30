@@ -7,11 +7,79 @@
         android:id="@+id/toolbar_layout"
         layout="@layout/toolbar_layout" />
 
+    <Switch
+        android:id="@+id/download_type_switch"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/toolbar_layout"
+        android:layout_marginLeft="20dp"
+        android:layout_marginTop="12dp"
+        android:layout_marginRight="20dp"
+        android:layout_marginBottom="6dp"
+        android:text="@string/download_type_complete"
+        android:checked="true" />
+
+    <LinearLayout
+        android:id="@+id/partial_download_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/download_type_switch"
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp"
+        android:layout_marginBottom="6dp"
+        android:orientation="vertical"
+        android:visibility="gone">
+
+        <org.schabi.newpipe.views.NewPipeTextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/partial_download_interval"
+            android:textSize="14sp"
+            android:textStyle="bold" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="8dp">
+
+            <org.schabi.newpipe.views.NewPipeTextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/start_time"
+                android:layout_marginRight="8dp" />
+
+            <org.schabi.newpipe.views.NewPipeEditText
+                android:id="@+id/start_time_edit"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:hint="00:00:00"
+                android:inputType="time" />
+
+            <org.schabi.newpipe.views.NewPipeTextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/end_time"
+                android:layout_marginLeft="16dp"
+                android:layout_marginRight="8dp" />
+
+            <org.schabi.newpipe.views.NewPipeEditText
+                android:id="@+id/end_time_edit"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:hint="00:00:00"
+                android:inputType="time" />
+
+        </LinearLayout>
+    </LinearLayout>
+
     <org.schabi.newpipe.views.NewPipeTextView
         android:id="@+id/file_name_text_view"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/toolbar_layout"
+        android:layout_below="@+id/partial_download_layout"
         android:layout_marginLeft="24dp"
         android:layout_marginTop="12dp"
         android:layout_marginRight="24dp"
