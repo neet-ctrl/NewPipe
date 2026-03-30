@@ -20,7 +20,9 @@ jobs:
           cache: 'gradle'
 
       - name: Verify Java version
-        run: java -version && echo "JAVA_HOME: $JAVA_HOME"
+        run: |
+          java -version
+          echo "JAVA_HOME: $JAVA_HOME"
 
       - name: Build debug APK
         run: ./gradlew assembleDebug --stacktrace --no-configuration-cache
