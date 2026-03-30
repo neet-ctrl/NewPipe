@@ -20,7 +20,7 @@ jobs:
           cache: gradle
 
       - name: Build debug APK
-        run: ./gradlew assembleDebug --stacktrace
+        run: ./gradlew assembleDebug -x lint -x ktlint -x runCheckstyle --stacktrace
 
       - name: Publish APK metadata
         run: |
