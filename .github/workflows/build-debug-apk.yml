@@ -15,17 +15,12 @@ jobs:
 
       - uses: actions/setup-java@v5
         with:
-          distribution: 'temurin'
+          distribution: temurin
           java-version: '21'
-          cache: 'gradle'
-
-      - name: Verify Java version
-        run: |
-          java -version
-          echo "JAVA_HOME: $JAVA_HOME"
+          cache: gradle
 
       - name: Build debug APK
-        run: ./gradlew assembleDebug --stacktrace --no-configuration-cache
+        run: ./gradlew assembleDebug --stacktrace
 
       - name: Publish APK metadata
         run: |
@@ -52,5 +47,4 @@ jobs:
         uses: actions/upload-artifact@v6
         with:
           name: app-debug
-          path: app/build/outputs/apk/debug/NewPipe_Debug.apk
           path: app/build/outputs/apk/debug/NewPipe_Debug.apk
