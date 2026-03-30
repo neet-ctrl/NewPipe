@@ -20,7 +20,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.CompoundButton;
 import android.widget.RadioGroup;
 import android.widget.SeekBar;
 import android.widget.Toast;
@@ -323,13 +322,15 @@ public class DownloadDialog extends DialogFragment
         dialogBinding.downloadTypeSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
             isPartialDownload = isChecked;
             dialogBinding.partialDownloadLayout.setVisibility(isChecked ? View.VISIBLE : View.GONE);
-            dialogBinding.downloadTypeSwitch.setText(isChecked ?
-                getString(R.string.download_type_partial) : getString(R.string.download_type_complete));
+            dialogBinding.downloadTypeSwitch.setText(isChecked
+                ? getString(R.string.download_type_partial)
+                : getString(R.string.download_type_complete));
         });
 
         // Initialize partial download UI
         dialogBinding.downloadTypeSwitch.setChecked(isPartialDownload);
-        dialogBinding.partialDownloadLayout.setVisibility(isPartialDownload ? View.VISIBLE : View.GONE);
+        dialogBinding.partialDownloadLayout.setVisibility(
+            isPartialDownload ? View.VISIBLE : View.GONE);
         dialogBinding.startTimeEdit.setText(startTime);
         dialogBinding.endTimeEdit.setText(endTime);
 
